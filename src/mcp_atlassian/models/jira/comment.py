@@ -7,6 +7,8 @@ This module provides Pydantic models for Jira comments.
 import logging
 from typing import Any
 
+from bs4 import BeautifulSoup
+
 from ..base import ApiModel, TimestampMixin
 from ..constants import (
     EMPTY_STRING,
@@ -69,6 +71,15 @@ class JiraComment(ApiModel, TimestampMixin):
         elif body:
             # Handle plain text or HTML content
             body_content = str(body)
+
+        if body_content:
+            try:
+                soup = BeautifulSoup(body_content, "html.parser")
+                body_content = soup.get_text()
+            except Exception as exc:
+                logger.debug(
+                    "Failed to strip HTML from Jira comment body: %s", exc, exc_info=True
+                )
 
         sanitized_body = body_content.replace("\\r", "").replace("\\n", "")
 
