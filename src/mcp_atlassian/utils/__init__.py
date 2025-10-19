@@ -4,7 +4,7 @@ This package provides various utility functions used throughout the codebase.
 """
 
 from .date import parse_date
-from .io import is_read_only_mode
+from .io import is_read_only_mode, should_ignore_comment_limit
 
 # Export lifecycle utilities
 from .lifecycle import (
@@ -24,6 +24,7 @@ __all__ = [
     "configure_ssl_verification",
     "is_atlassian_cloud_url",
     "is_read_only_mode",
+    "should_ignore_comment_limit",
     "setup_logging",
     "parse_date",
     "parse_iso8601_date",

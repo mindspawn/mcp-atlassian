@@ -9,7 +9,7 @@ from requests.exceptions import HTTPError
 from ..exceptions import MCPAtlassianAuthenticationError
 from ..models.jira import JiraIssue
 from ..models.jira.common import JiraChangelog
-from ..utils import parse_date
+from ..utils import parse_date, should_ignore_comment_limit
 from .client import JiraClient
 from .constants import DEFAULT_READ_JIRA_FIELDS
 from .protocols import (
@@ -163,7 +163,17 @@ class IssuesMixin(
 
             # Get comments if needed
             if "comment" in fields_data:
-                comment_limit_int = self._normalize_comment_limit(comment_limit)
+                effective_comment_limit: int | str | None = comment_limit
+                if should_ignore_comment_limit():
+                    logger.debug(
+                        "IGNORE_COMMENT_LIMIT enabled; retrieving all comments for %s",
+                        issue_key,
+                    )
+                    effective_comment_limit = "all"
+
+                comment_limit_int = self._normalize_comment_limit(
+                    effective_comment_limit
+                )
                 comments = self._get_issue_comments_if_needed(
                     issue_key, comment_limit_int
                 )

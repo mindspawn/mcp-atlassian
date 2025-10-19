@@ -15,3 +15,16 @@ def is_read_only_mode() -> bool:
         True if read-only mode is enabled, False otherwise
     """
     return is_env_extended_truthy("READ_ONLY_MODE", "false")
+
+
+def should_ignore_comment_limit() -> bool:
+    """Return True when comment limits should be ignored for Jira issues.
+
+    Controlled via the IGNORE_COMMENT_LIMIT environment variable. Accepts
+    the same truthy values as other boolean env flags ("true", "1", "yes",
+    "y", "on"), case-insensitive.
+
+    Returns:
+        True if all comments should be retrieved, False otherwise.
+    """
+    return is_env_extended_truthy("IGNORE_COMMENT_LIMIT", "false")
