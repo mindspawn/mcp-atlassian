@@ -70,9 +70,11 @@ class JiraComment(ApiModel, TimestampMixin):
             # Handle plain text or HTML content
             body_content = str(body)
 
+        sanitized_body = body_content.replace("\\r", "").replace("\\n", "")
+
         return cls(
             id=comment_id,
-            body=body_content,
+            body=sanitized_body,
             created=str(data.get("created", EMPTY_STRING)),
             updated=str(data.get("updated", EMPTY_STRING)),
             author=author,
