@@ -16,7 +16,7 @@ from ..constants import (
     JIRA_DEFAULT_ID,
     JIRA_DEFAULT_KEY,
 )
-from .comment import JiraComment
+from .comment import JiraComment, sanitize_text_content
 from .common import (
     JiraAttachment,
     JiraChangelog,
@@ -267,7 +267,14 @@ class JiraIssue(ApiModel, TimestampMixin):
         issue_id = str(data.get("id", JIRA_DEFAULT_ID))
         key = str(data.get("key", JIRA_DEFAULT_KEY))
         summary = str(fields.get("summary", EMPTY_STRING))
-        description = fields.get("description")
+        raw_description = fields.get("description")
+        description: str | None = None
+        if isinstance(raw_description, dict) and "content" in raw_description:
+            description = sanitize_text_content(
+                str(raw_description.get("content", EMPTY_STRING))
+            )
+        elif raw_description is not None:
+            description = sanitize_text_content(str(raw_description))
 
         # Timestamps
         created = str(fields.get("created", EMPTY_STRING))

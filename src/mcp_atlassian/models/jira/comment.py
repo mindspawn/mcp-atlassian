@@ -19,6 +19,23 @@ from .common import JiraUser
 logger = logging.getLogger(__name__)
 
 
+def sanitize_text_content(text: str) -> str:
+    """Strip HTML and escaped newline sequences from text content."""
+    if not text:
+        return text
+
+    sanitized = text
+    try:
+        soup = BeautifulSoup(sanitized, "html.parser")
+        sanitized = soup.get_text()
+    except Exception as exc:
+        logger.debug(
+            "Failed to strip HTML from text content: %s", exc, exc_info=True
+        )
+
+    return sanitized.replace("\\r", "").replace("\\n", "")
+
+
 class JiraComment(ApiModel, TimestampMixin):
     """
     Model representing a Jira issue comment.
@@ -72,16 +89,7 @@ class JiraComment(ApiModel, TimestampMixin):
             # Handle plain text or HTML content
             body_content = str(body)
 
-        if body_content:
-            try:
-                soup = BeautifulSoup(body_content, "html.parser")
-                body_content = soup.get_text()
-            except Exception as exc:
-                logger.debug(
-                    "Failed to strip HTML from Jira comment body: %s", exc, exc_info=True
-                )
-
-        sanitized_body = body_content.replace("\\r", "").replace("\\n", "")
+        sanitized_body = sanitize_text_content(body_content)
 
         return cls(
             id=comment_id,
